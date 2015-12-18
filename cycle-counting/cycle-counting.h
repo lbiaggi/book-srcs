@@ -4,7 +4,7 @@
 #include <x86intrin.h>
 
 /* Macro */
-inline unsigned long START_TSC_READ(void)
+unsigned long inline START_TSC_READ(void)
 {
   unsigned long r;
 
@@ -16,7 +16,7 @@ inline unsigned long START_TSC_READ(void)
   return r;
 }
 
-inline unsigned long END_TSC_READ(void)
+unsigned long inline END_TSC_READ(void)
 {
   unsigned long r;
 
