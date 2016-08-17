@@ -1,30 +1,42 @@
 #ifndef __CYCLE_COUNTING_INCLUDED__
 #define __CYCLE_COUNTING_INCLUDED__
 
+#include <stdint.h>
 #include <x86intrin.h>
 
 /* Macro */
-unsigned long inline START_TSC_READ(void)
+inline uint64_t START_TSC_READ(void)
 {
-  unsigned long r;
+  uint32_t a, d;
 
-  __asm__ __volatile__ ( "mfence\n"
+  __asm__ __volatile__ ( "xorl %%eax,%%eax\n"
+                         "cpuid\n"
                          "rdtsc\n"
-                         "shlq $32,%%rdx\n"
-                         "orq  %%rdx,%%rax" : "=a" (r) : : "rdx" );
+                         : "=a" (a), "=d" (d) : : 
+  #ifdef __x86_64
+                         "rbx", "rcx"
+  #else
+                         "ebx", "ecx"
+  #endif                         
+                       );
 
-  return r;
+  return ((uint64_t)d << 32) | a;
 }
 
-unsigned long inline END_TSC_READ(void)
+inline uint64_t END_TSC_READ(void)
 {
-  unsigned long r;
+  uint32_t a, d;
 
   __asm__ __volatile__ ( "rdtscp\n"
-                         "shlq $32,%%rdx\n"
-                         "orq  %%rdx,%%rax" : "=a" (r) : : "rcx", "rdx" );
-  return r;
+                         : "=a" (a), "=d" (d) : : 
+  #ifdef __x86_64
+                         "rcx"
+  #else
+                         "ecx", "ecx"
+  #endif                         
+                       );
+
+  return ((uint64_t)d << 32) | a;
 }
 
 #endif
-
